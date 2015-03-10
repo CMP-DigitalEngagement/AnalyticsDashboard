@@ -1,4 +1,14 @@
 ﻿<?php
+
+
+function showErrors()
+{
+	error_reporting(E_ALL);
+	ini_set('display_errors', '1');
+}
+
+showErrors();
+
 require_once 'dashboard.php';
 
 
@@ -132,8 +142,8 @@ function getActive()
 	<div id='Panel' class='main-panel container'>
 		
 		<?php setupCharts(
-			array("web-traffic","web-byhour","mobile-os","web-browser"),
-			array("Overall Web Traffic","Web Traffic by Hour","Mobile Operating Systems","Web Browsers"));
+			array("web-traffic","web-byhour","mobile-os","web-browser","most-viewed"),
+			array("Overall Web Traffic","Web Traffic by Hour","Mobile Operating Systems","Web Browsers","Most Viewed Pages"));
 			?>
 	</div>
 	

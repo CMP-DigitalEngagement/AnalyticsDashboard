@@ -59,6 +59,12 @@ function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
 	}
 	catch (Exception $e)	{	}
 	
+	try
+	{
+		$data["most-viewed"] = runQuery($analytics, $account,$from,$to,"ga:pageviews","ga:pagePath","-ga:pageviews",'15')->getRows();
+	}
+	catch (Exception $e)	{	}
+	
 	
 	
 	return $data;
@@ -132,6 +138,19 @@ if(isset($data["web-browser"]))
 
 }
 
+if(isset($data["most-viewed"]))
+{
+	$id = invertData($data["most-viewed"]);
+	
+	//var_dump($id);
+	
+	$bar = new Highchart('bar');
+	$bar->addCategories($id[0]);
+	$bar->addSeries($id[1],'Views', $colors[2]);
+	$charts["most-viewed"] = $bar->toChart("#most-viewed");
+
+}
+
 return $charts;
 
 }
@@ -159,17 +178,6 @@ function invertData($data)
 	}
 	return $newData;
 }
-
-function getClient()
-{
-	$client = new Google_Client();
-	$client->setApplicationName(getAppName());
-	$client->setClientId(getClientID());
-	
-	return $client;
-	
-}
-
 
 
 function setupCharts($cnames, $ctitles)
