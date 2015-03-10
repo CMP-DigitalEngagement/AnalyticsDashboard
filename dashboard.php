@@ -9,7 +9,7 @@ function getAccounts()
 	$accounts = array();
 	$accounts["CMOA"] = "ga:53193816";
 	$accounts["CSC"] = "ga:12575410";
-	$accounts["CMNH"] = "ga:86907168";
+	$accounts["CMNH"] = "ga:19917087"; //"ga:86907168";
 	$accounts["AWM"] = "ga:30663551";
 	$accounts["CMP"] = "";
 	
@@ -62,6 +62,11 @@ function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
 	try
 	{
 		$data["most-viewed"] = runQuery($analytics, $account,$from,$to,"ga:pageviews","ga:pagePath","-ga:pageviews",'15')->getRows();
+	}
+	catch (Exception $e)	{	}
+		try
+	{
+		$data["hist-views"] = runQuery($analytics, $account,'2008-10-01',$to,"ga:pageviews","ga:date","",'10000')->getRows();
 	}
 	catch (Exception $e)	{	}
 	
@@ -148,6 +153,18 @@ if(isset($data["most-viewed"]))
 	$bar->addCategories($id[0]);
 	$bar->addSeries($id[1],'Views', $colors[2]);
 	$charts["most-viewed"] = $bar->toChart("#most-viewed");
+
+}
+
+if(isset($data["hist-views"]))
+{
+	$id = invertData($data["hist-views"]);
+	
+	//var_dump($id);
+	
+	$chart = new Highstock();
+	$chart->addSeries($id[0], $id[1],'Views', $colors[3]);
+	$charts["hist-views"] = $chart->toChart("#hist-views");
 
 }
 

@@ -157,148 +157,65 @@ class Highchart
 
 }
 
-/*
-
-function generateAreaspline()
+class Highstock
 {
-$ret = <<<EOT
-{
-chart: {
-	type: 'areaspline'
-},
-
-plotOptions: {
-	areaspline: {
-		fillOpacity: 0.2
+	public function __construct() 
+	{
+		$chart = array();
+		$this->chart['series'] = array();
+		$this->chart['title'] = array();
+		$this->chart['title']['text'] = '';
+		$this->chart['rangeSelector'] = array();
+		$this->chart['rangeSelector']['selected'] = 1;
 	}
-},
-EOT;
 
-$ret .= generateTitles();
+
+	
+		public function addSeries($time, $data, $name='', $color='')
+	{
+		$newSeries = array();
 		
-
-
-}
-
-
-function generateTimeChart($type)
-{
-
-}
-
-
-
-function generateTitles($this->chartTitle='', $yaxisTitle='', $units='')
-{
-return <<<EOT
-title: {
-	text: '$this->chartTitle'
-},
-	 tooltip: {
-	shared: true,
-	valueSuffix: ' $units'
-},
-credits: {
-	enabled: false
-},
-  yAxis: {
-	title: {
-		text: '$yaxisTitle'
-	},
-},
-EOT;
-
-}
-
-
-function getLegend()
-{
-return <<<EOT
-legend: {
-	layout: 'horizontal',
-	align: 'center',
-	verticalAlign: 'top',
-	floating: true,
-	borderWidth: 0,
-	backgroundColor: '#FFFFFF'
-},
-EOT;
-
-}
-
-function generateLabels($labels, $step=1)
-{
-	$ret = "categories : [";
-	$first = true;
-	foreach($labels as $l)
-	{
-		if(!$first)
+		if(!empty($name))
 		{
-			$ret .= ", ";
+		$newSeries['name'] = $name;
 		}
-		$first = false;
-		$ret .= $l;
-	}
-	
-	$ret .= "],\n";
-	if($step > 1)
-	{
-	 $ret .= "labels:{step:$step},\n";
-	}
-	
-	return $ret;
-
-}
-function genMultipleSeries($dataArray, $nameArray, $colorArray)
-{
-	$i = 0;
-	$ret = "";
-	foreach($data as $d)
-	{
-		$ret .= generateSeries($d, $nameArray[$i],$colorArray[$i]);
-	
-	}
-	return $ret;
-
-}
-function generateSeries($data, $name='', $color='', $more='')
-{
-	$ret = "{\n";
-	if(!empty($name))
-	{
-		$ret .= "name: '$name',\n";
-	}
-	if(!empty($color))
-	{
-		$ret .= "color: '$color',\n";
-	}
-	$ret .= getDataString($data) . ",\n";
-	$ret .= $more;
-	$ret .= "\n},\n";
-	return $ret;
-} 
-
-
-function getDataString($data)
-{
-
-	$ret = "data : [";
-	$first = true;
-	foreach($data as $d)
-	{
-		if(!$first)
+		if(!empty($color))
 		{
-			$ret .= ", ";
+		$newSeries['color'] = $color;
 		}
-		$first = false;
-		$ret .= $d;
+		
+		$newSeries['type'] = 'areaspline';
+		
+		$newSeries['data'] = $this->correctData($time, $data);
+		
+		array_push($this->chart['series'],$newSeries);
+	}
+	function correctData($time, $data)
+	{
+		$i = 0;
+		$newdata = array();
+		foreach($data as $d)
+		{
+			$dt = strtotime($time[$i]) * 1000;
+			array_push($newdata, array($dt, intval($d)));
+			$i++;
+		}
+		
+		return $newdata;
+	
 	}
 	
-	$ret .= "],";
+	public function toJSON()
+	{
+		return str_replace("},","},\n",json_encode($this->chart));
+	}
 	
-	return $ret;
+	public function toChart($selector)
+	{
+		return "$('" . $selector . "').highcharts('StockChart',\n" . $this->toJSON() . "\n);\n\n";
+	}
+
 }
-*/
 
 
 
