@@ -127,7 +127,7 @@ if(isset($data["web-byhour"]))
 	$areaspline->addSeries($wt[1],'Pageviews',$colors[3]);
 	$areaspline->addSeries($wt[2],'Sessions',$colors[2]);
 	$areaspline->addSeries($wt[3],'Users',$colors[1]);
-	$areaspline->addCategories($wt[0], 3);
+	$areaspline->addCategories(hours(), 3);
 	$charts["web-byhour"] = $areaspline->toChart("#web-byhour");
 
 }
@@ -194,6 +194,29 @@ function invertData($data)
 		$i++;
 	}
 	return $newData;
+}
+
+function hours()
+{
+
+	$app = array("am","pm");
+	$res = array();
+	for($i = 0; $i < 2; $i++)
+	{
+		for($j = 0; $j < 12; $j++)
+		{
+			if($j == 0)
+			{
+				array_push($res,"12 " . $app[$i]);
+			}
+			else
+			{
+				array_push($res,$j . " " . $app[$i]);
+			}
+		}
+	
+	}
+	return $res;
 }
 
 
