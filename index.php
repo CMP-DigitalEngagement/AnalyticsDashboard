@@ -27,7 +27,14 @@ function getActive()
 {
 	if(isset($_POST["Museum"]))
 	{
-		print "\"#" . $_POST["Museum"] . "tab\"";
+		if($_POST["Museum"] == "Compare")
+		{
+			print "\"#" . $_POST["Museum"] . "\"";
+		}
+		else
+		{
+			print "\"#" . $_POST["Museum"] . "tab\"";
+		}
 	}
 	else
 	{
@@ -46,17 +53,12 @@ function getActive()
 			
 			
 			
-			<?php
-			foreach($charts as $c)
-			{
-				print $c;
-			}
-			?>
+		
 			
 			
 			$('#main-nav').children().removeClass("active");
 			$(<?php getActive(); ?>).addClass("active");
-			
+			console.log(<?php getActive(); ?>);
 			
 		
 			$('#main-nav').children().click(function()
@@ -67,13 +69,25 @@ function getActive()
 				
 				//Get museum ID
 				var id = $(this).attr("id");
-				var id = id.substring(0,id.length - 3);
+				if(id != 'Compare')
+				{
+					id = id.substring(0,id.length - 3);
+				}
+				console.log(id);
 				
 				//Submit a form so that php knows which museum to generate data for
 				$("#MuseumID").attr("value",id);
 				$("#MForm").submit();
 				
+				
 			});
+			
+				<?php
+			foreach($charts as $c)
+			{
+				print $c;
+			}
+			?>
 		
 		});
 		
@@ -120,6 +134,8 @@ function getActive()
 </head>
 <body>
 	<ul id='main-nav' class="nav nav-tabs">
+		<li id='Compare' role="presentation"><a href="#">Compare</a></li>
+	
 		<li id='CMPtab' role="presentation" class="active"><a href="#">Central</a></li>
 
 		<li id='CMOAtab' role="presentation" ><a href="#">CMOA</a></li>
@@ -141,9 +157,20 @@ function getActive()
 	
 	<div id='Panel' class='main-panel container'>
 		
-		<?php setupCharts(
+		<?php 
+		if(getMuseum() != "Compare")
+		{		
+		setupCharts(
 			array("web-traffic","web-byhour","mobile-os","web-browser","most-viewed","hist-views"),
 			array("Overall Web Traffic","Web Traffic by Hour","Mobile Operating Systems","Web Browsers","Most Viewed Pages","Historical Page Views"));
+		}
+		else
+		{
+			setupCharts(
+				array("hist"),
+				array("Historical Pageviews"));
+		
+		}
 			?>
 	</div>
 	

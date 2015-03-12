@@ -16,14 +16,45 @@ function getAccounts()
 	return $accounts;
 }
 
+function GDate($time = '')
+{
+	if($time == '')	return date('Y-m-d');
+	return date('Y-m-d', $time);
+}
 
-function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
+function getCompData($analytics, $from = '', $to = '')
+{
+	if($to == '') $to = GDate();
+	
+	$data = array();
+	$data["hist"] = array();
+	$acct = getAccounts();
+	//var_dump($to);
+	foreach($acct as $aname=>$aval)
+	{
+
+		try
+		{
+			$data["hist"][$aname] = invertData(runQuery($analytics, $aval,'2008-10-01',$to,"ga:pageviews","ga:date","",'10000')->getRows());
+		}
+		catch (Exception $e)	{ 
+		//var_dump($e);	
+		}
+		//var_dump($data);
+	}
+	//invertData();
+	return $data;
+
+}
+
+function getMuseum()
 {
 	$accounts = getAccounts();
 	
 	//Set account to use
 	if(isset($_POST["Museum"]))
 	{
+		if($_POST["Museum"] == "Compare") return "Compare";
 		$account = $accounts[$_POST["Museum"]];
 	}
 	else
@@ -31,6 +62,14 @@ function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
 		$account = $accounts["CMP"];
 	}
 	
+	return $account;
+}
+
+function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
+{
+	$to = '2015-03-10';
+
+	$account = getMuseum();
 	$data = array();
 	//all queries should be in try catch blocks
 	
@@ -78,10 +117,11 @@ function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
 function getCharts($analytics)
 {
 $charts = array();
-
-
-$data = getData($analytics);
 $colors = getColorScheme();
+if(getMuseum() != "Compare")
+{
+$data = getData($analytics);
+
 
 
 //Overall web traffic
@@ -165,6 +205,27 @@ if(isset($data["hist-views"]))
 	$chart = new Highstock();
 	$chart->addSeries($id[0], $id[1],'Views', $colors[3]);
 	$charts["hist-views"] = $chart->toChart("#hist-views");
+
+}
+
+}
+else
+{
+$data = getCompData($analytics);
+//Compare Historical
+$chart = new Highstock();
+$c = 0;
+$hist = $data["hist"];
+//var_dump($data);
+foreach($hist as $dname=>$dval)
+{
+	$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
+	$c++;
+}
+$chart->addLegend();
+$charts["hist-views"] = $chart->toChart("#hist");
+
+
 
 }
 

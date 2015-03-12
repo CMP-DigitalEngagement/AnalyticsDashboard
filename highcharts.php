@@ -162,11 +162,14 @@ class Highstock
 	public function __construct() 
 	{
 		$chart = array();
-		$this->chart['series'] = array();
+		
 		$this->chart['title'] = array();
+
 		$this->chart['title']['text'] = '';
 		$this->chart['rangeSelector'] = array();
 		$this->chart['rangeSelector']['selected'] = 1;
+		$this->chart['credits']['enabled'] = false;
+		$this->chart['series'] = array();
 	}
 
 
@@ -184,7 +187,7 @@ class Highstock
 		$newSeries['color'] = $color;
 		}
 		
-		$newSeries['type'] = 'areaspline';
+		$newSeries['type'] = 'spline';
 		
 		$newSeries['data'] = $this->correctData($time, $data);
 		
@@ -203,6 +206,17 @@ class Highstock
 		
 		return $newdata;
 	
+	}
+	
+		public function addLegend()
+	{
+		$this->chart['legend'] = array();
+		//$this->chart['legend']['layout'] = 'vertical';
+		$this->chart['legend']['align'] = 'center';
+		//$this->chart['legend']['verticalAlign'] = 'top';
+		//$this->chart['legend']['floating'] = true;
+		$this->chart['legend']['borderWidth'] = 0;
+		$this->chart['legend']['backgroundColor'] = 'white';
 	}
 	
 	public function toJSON()
