@@ -22,7 +22,17 @@ function GDate($time = '')
 	return date('Y-m-d', $time);
 }
 
-function getCompData($analytics, $from = '', $to = '')
+function fromGDateHour($gTime)
+{
+	$year = substr($gTime,0,4);
+	$mon = substr($gTime, 4, 2);
+	$day = substr($gTime, 6,2);
+	$hr = substr($gTime, 8,2);
+	
+	return $year . "-" . $mon . "-" . $day . " " . $hr . ":00";
+}
+
+function getCompData($analytics, $from = '2008-10-01', $to = '')
 {
 	if($to == '') $to = GDate();
 	
@@ -34,13 +44,14 @@ function getCompData($analytics, $from = '', $to = '')
 
 		try
 		{
-			$data["hist"][$aname] = invertData(runQuery($analytics, $aval,'2008-10-01',$to,"ga:pageviews","ga:date","",'10000')->getRows());
+			$data["hist"][$aname] = invertData(runQuery($analytics, $aval,$from,$to,"ga:pageviews","ga:date","",'10000')->getRows());
 		}
-		catch (Exception $e)	{ 
+		catch (Exception $e)	
+		{ }
 		
 		try
 		{
-			$data["duration"][$aname] = invertData(runQuery($analytics, $aval,'2008-10-01',$to,"ga:avgSessionDuration","ga:date","",'10000')->getRows());
+			$data["duration"][$aname] = invertData(runQuery($analytics, $aval,$from,$to,"ga:avgSessionDuration","ga:date","",'10000')->getRows());
 		}
 		catch (Exception $e)	{ 
 		//var_dump($e);	
@@ -72,7 +83,7 @@ function getMuseum()
 
 function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
 {
-	$to = '2015-03-10';
+	//$to = '2015-03-10';
 
 	$account = getMuseum();
 	$data = array();
@@ -113,7 +124,11 @@ function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
 		$data["hist-views"] = runQuery($analytics, $account,'2008-10-01',$to,"ga:pageviews","ga:date","",'10000')->getRows();
 	}
 	catch (Exception $e)	{	}
-	
+		try
+	{
+		$data["tos"] = runQuery($analytics, $account,$from,$to,"ga:avgTimeOnPage,ga:avgSessionDuration","ga:date","",'10000')->getRows();
+	}
+	catch (Exception $e)	{	}
 	
 	
 	return $data;
@@ -201,6 +216,25 @@ if(isset($data["most-viewed"]))
 
 }
 
+if(isset($data["tos"]))
+{
+	$id = invertData($data["tos"]);
+	
+	$chart = new Highchart('areaspline');
+	
+	$start = strtotime(($id[0][0])) * 1000;
+	$int = (strtotime(($id[0][1])) - strtotime(($id[0][0]))) * 1000;
+	$chart->addTimestamps($start, $int);
+	$chart->addLegend();
+	//$chart->addPlotOption('fillOpacity',0.2);
+	$chart->addSeries($id[2],"Avg. Time on Site (s)", $colors[1]);
+	$chart->addSeries($id[1],"Avg. Time on Page (s)", $colors[0]);
+	
+	$charts["tos"] = $chart->toChart("#tos");
+	
+	
+}
+
 if(isset($data["hist-views"]))
 {
 	$id = invertData($data["hist-views"]);
@@ -212,6 +246,7 @@ if(isset($data["hist-views"]))
 	$charts["hist-views"] = $chart->toChart("#hist-views");
 
 }
+
 
 }
 else

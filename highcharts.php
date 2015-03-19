@@ -16,6 +16,9 @@ class Highchart
 		$this->chart['credits'] = array();
 		$this->chart['yAxis'] = array();
 		$this->chart['xAxis'] = array();
+		
+		
+		
 		$this->chart['series'] = array();
 		
 		$this->chart['credits']['enabled'] = false;

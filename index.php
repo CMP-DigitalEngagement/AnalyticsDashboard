@@ -161,8 +161,8 @@ function getActive()
 		if(getMuseum() != "Compare")
 		{		
 		setupCharts(
-			array("web-traffic","web-byhour","mobile-os","web-browser","most-viewed","hist-views"),
-			array("Overall Web Traffic","Web Traffic by Hour","Mobile Operating Systems","Web Browsers","Most Viewed Pages","Historical Page Views"));
+			array("web-traffic","web-byhour","mobile-os","web-browser","most-viewed","hist-views","tos"),
+			array("Overall Web Traffic","Web Traffic by Hour","Mobile Operating Systems","Web Browsers","Most Viewed Pages","Historical Page Views","Time on Site"));
 		}
 		else
 		{
