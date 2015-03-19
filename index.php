@@ -167,8 +167,8 @@ function getActive()
 		else
 		{
 			setupCharts(
-				array("hist"),
-				array("Historical Pageviews"));
+				array("hist","duration"),
+				array("Historical Pageviews","Average Time on Site"));
 		
 		}
 			?>

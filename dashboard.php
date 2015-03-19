@@ -29,13 +29,18 @@ function getCompData($analytics, $from = '', $to = '')
 	$data = array();
 	$data["hist"] = array();
 	$acct = getAccounts();
-	//var_dump($to);
 	foreach($acct as $aname=>$aval)
 	{
 
 		try
 		{
 			$data["hist"][$aname] = invertData(runQuery($analytics, $aval,'2008-10-01',$to,"ga:pageviews","ga:date","",'10000')->getRows());
+		}
+		catch (Exception $e)	{ 
+		
+		try
+		{
+			$data["duration"][$aname] = invertData(runQuery($analytics, $aval,'2008-10-01',$to,"ga:avgSessionDuration","ga:date","",'10000')->getRows());
 		}
 		catch (Exception $e)	{ 
 		//var_dump($e);	
@@ -212,7 +217,7 @@ if(isset($data["hist-views"]))
 else
 {
 $data = getCompData($analytics);
-//Compare Historical
+//Compare Views
 $chart = new Highstock();
 $c = 0;
 $hist = $data["hist"];
@@ -224,6 +229,19 @@ foreach($hist as $dname=>$dval)
 }
 $chart->addLegend();
 $charts["hist-views"] = $chart->toChart("#hist");
+
+//Compare Duration
+$chart = new Highstock();
+$c = 0;
+$cData = $data["duration"];
+//var_dump($data);
+foreach($cData as $dname=>$dval)
+{
+	$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
+	$c++;
+}
+$chart->addLegend();
+$charts["hist-dur"] = $chart->toChart("#duration");
 
 
 
