@@ -147,6 +147,56 @@ class Highchart
 		array_push($this->chart['series'],$newSeries);
 	}
 	
+	/* Requires Drilldown Module */
+	public function addDrilldown($seriesName, $data)
+	{
+		$ser = $this->chart['series'];
+		$ns = count($ser);
+		
+		$ddS = null;
+		for($i = 0; $i < $ns; $i++)
+		{
+			if($ser[$i]['name'] = $seriesName)
+			{
+				$ddS = $ser[$i];
+				break;
+			}
+		}
+		
+		if(!empty($ddS))
+		{
+			$ddS['drilldown'] = "DD" . $seriesName;
+			
+			if(!isset($this->chart['drilldown']['series']))
+			{
+				$this->chart['drilldown']['series'] = array();
+			}
+			
+			$newDD = array();
+			$newDD['id'] = "DD" . $seriesName;
+			$newDD['data'] = array();
+			foreach($data as $k=>$v)
+			{
+				$dp = array();
+				$dp[0] = $k;
+				$dp[1] = $v;
+				array_push($newDD['data'], $dp);
+			}	
+		}
+	}
+	
+	
+	/* Import / Export data functions */
+	
+	public function importArray()
+	{
+	
+	}
+	
+	public function getArray()
+	{
+		return $this->chart;
+	}	
 	public function toJSON()
 	{
 		return str_replace("},","},\n",json_encode($this->chart));
