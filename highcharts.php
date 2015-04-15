@@ -15,7 +15,7 @@ class Highchart
 		$this->chart['tooltip'] = array();
 		$this->chart['credits'] = array();
 		$this->chart['yAxis'] = array();
-		$this->chart['xAxis'] = array();
+		//$this->chart['xAxis'] = array();
 		
 		
 		
@@ -148,24 +148,87 @@ class Highchart
 	}
 	
 	/* Requires Drilldown Module */
+	public function addDrilldownSeries($labels, $data, $subdata, $name='', $color='')
+	{
+		$this->chart['xAxis']['type']= 'category';
+	
+		/* Create the series */
+		
+		$newSeries = array();
+		
+		if(!empty($name))
+		{
+			$newSeries['name'] = $name;
+		}
+		if(!empty($color))
+		{
+			$newSeries['color'] = $color;
+		}
+		
+		$newSeries['data'] = array();
+		
+		$ddLabel = array();
+
+		for($i = 0; $i < count($data); $i++)
+		{
+			$dataPoint = array();
+			$dataPoint['name'] = $labels[$i];
+			$dataPoint['y'] = $data[$i];
+			$ddLabel[$i] = $labels[$i] . 'DD';
+			$dataPoint['drilldown'] = $ddLabel[$i];
+			array_push($newSeries['data'], $dataPoint);
+		}
+		
+		array_push($this->chart['series'],$newSeries);
+		/* Create the drilldowns */
+		if(!isset($this->chart['drilldown']['series']))
+		{
+			$this->chart['drilldown']['series'] = array();
+		}
+		
+		for($i = 0; $i < count($labels); $i++)
+		{
+			$label = $labels[$i];
+			if(isset($subdata[$label]))
+			{
+				$ddSeries = array();
+				$ddSeries['id'] = $ddLabel[$i];
+				$ddSeries['data'] = array();
+				$subd = $subdata[$label];
+				foreach($subd as $k=>$v)
+				{
+					$ddData = array();
+					$ddData[0] = $k;
+					$ddData[1] = $v;
+					array_push($ddSeries['data'], $ddData);
+				}
+				array_push($this->chart['drilldown']['series'], $ddSeries);
+			}
+		}
+		
+		
+		
+	}
+	
 	public function addDrilldown($seriesName, $data)
 	{
 		$ser = $this->chart['series'];
 		$ns = count($ser);
 		
-		$ddS = null;
+		$ddS = -1;
 		for($i = 0; $i < $ns; $i++)
 		{
-			if($ser[$i]['name'] = $seriesName)
+			var_dump($ser[$i]['name'] . " ?= " . $seriesName);
+			if($ser[$i]['name'] == $seriesName)
 			{
-				$ddS = $ser[$i];
+				$ddS = $i;
 				break;
 			}
 		}
 		
-		if(!empty($ddS))
+		if($ddS > -1)
 		{
-			$ddS['drilldown'] = "DD" . $seriesName;
+			$this->chart['series'][$ddS]['drilldown'] = "DD" . $seriesName;
 			
 			if(!isset($this->chart['drilldown']['series']))
 			{
@@ -181,7 +244,9 @@ class Highchart
 				$dp[0] = $k;
 				$dp[1] = $v;
 				array_push($newDD['data'], $dp);
-			}	
+			}
+
+			array_push($this->chart['drilldown']['series'],$newDD);
 		}
 	}
 	

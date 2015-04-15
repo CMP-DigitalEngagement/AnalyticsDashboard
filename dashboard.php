@@ -160,6 +160,7 @@ if(isset($data["web-traffic"]))
 	$areaspline->addSeries($wt[2],'Sessions',$colors[2]);
 	$areaspline->addSeries($wt[3],'Users',$colors[1]);
 	$areaspline->addTimestamps($start*1000, $int*1000);
+
 	$charts["web-traffic"] = $areaspline->toChart("#web-traffic");
 }
 
@@ -168,8 +169,9 @@ if(isset($data["mobile-os"]))
 	$mos = invertData($data["mobile-os"]);
 	
 	$bar = new Highchart('bar');
-	$bar->addCategories($mos[0]);
-	$bar->addSeries($mos[1],'Users', $colors[1]);
+	//$bar->addCategories($mos[0]);
+	//$bar->addSeries($mos[1],'Users', $colors[1]);
+	$bar->addDrilldownSeries(array('1','2','3'), array(14,12,2), array('1'=>array('test1'=>6,'test2'=>8)), 'Drilldown', $colors[0]);
 	$charts["mobile-os"] = $bar->toChart("#mobile-os");
 
 }
