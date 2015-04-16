@@ -2,6 +2,7 @@
 
 require_once "analytics.php";
 require_once "highcharts.php";
+require_once 'cache.php';
 
 
 function getAccounts()
@@ -32,9 +33,16 @@ function fromGDateHour($gTime)
 	return $year . "-" . $mon . "-" . $day . " " . $hr . ":00";
 }
 
-function getCompData($analytics, $from = '2008-10-01', $to = '')
+function getCompData($analytics, $from = '2008-10-01', $to = '', $cache=true)
 {
 	if($to == '') $to = GDate();
+	
+	//check cache for dataset
+	if($cache)
+	{
+		$cData = loadFromCache("COMP" . "@" . $from . "@" . $to);
+		if(!empty($cData)) return unserialize ( $cData );
+	}
 	
 	$data = array();
 	$data["hist"] = array();
@@ -59,6 +67,12 @@ function getCompData($analytics, $from = '2008-10-01', $to = '')
 		//var_dump($data);
 	}
 	//invertData();
+		if($cache)
+	{
+		$cData = serialize ($data);
+		storeInCache("COMP" . "@" . $from . "@" . $to, $cData);
+	}
+	
 	return $data;
 
 }
@@ -81,12 +95,20 @@ function getMuseum()
 	return $account;
 }
 
-function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
+function getData($analytics, $from = "2015-01-01", $to = "2015-01-31", $cache=true)
 {
 	//$to = '2015-03-10';
 
 	$account = getMuseum();
 	$data = array();
+	//check cache for dataset
+	if($cache)
+	{
+		$cData = loadFromCache($account . "@" . $from . "@" . $to);
+		if(!empty($cData)) return unserialize ( $cData );
+	}
+	
+	
 	//all queries should be in try catch blocks
 	
 	//Mobile OS data
@@ -131,6 +153,12 @@ function getData($analytics, $from = "2015-01-01", $to = "2015-01-31")
 	catch (Exception $e)	{	}
 	
 	
+	
+	if($cache)
+	{
+		$cData = serialize ($data);
+		storeInCache($account . "@" . $from . "@" . $to, $cData);
+	}
 	return $data;
 }
 
@@ -169,9 +197,9 @@ if(isset($data["mobile-os"]))
 	$mos = invertData($data["mobile-os"]);
 	
 	$bar = new Highchart('bar');
-	//$bar->addCategories($mos[0]);
-	//$bar->addSeries($mos[1],'Users', $colors[1]);
-	$bar->addDrilldownSeries(array('1','2','3'), array(14,12,2), array('1'=>array('test1'=>6,'test2'=>8)), 'Drilldown', $colors[0]);
+	$bar->addCategories($mos[0]);
+	$bar->addSeries($mos[1],'Users', $colors[1]);
+	//$bar->addDrilldownSeries(array('1','2','3'), array(14,12,2), array('1'=>array('test1'=>6,'test2'=>8)), 'Drilldown', $colors[0]);
 	$charts["mobile-os"] = $bar->toChart("#mobile-os");
 
 }
@@ -357,8 +385,10 @@ function setupChart($cname, $ctitle)
 			<h3 class="panel-title"><?php print $ctitle;?></h3>
 		</div>
 		<div class="panel-body">
+		<a href='http://work.drewmcdermott.net/analytics'>
 			<div class='chart-holder' id="<?php print $cname;?>">
 			</div>
+			</a>
 		</div>
 	</div>
 </div>

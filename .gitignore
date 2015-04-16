@@ -1,5 +1,8 @@
+/* State secrets */
 acctConfig.php
+sqlConfig.php
 *.p12
+/* Plugins which I don't want to have managed */
 /bootstrap
 /google-api
 /highcharts

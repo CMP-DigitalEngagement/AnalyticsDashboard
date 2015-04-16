@@ -5,6 +5,8 @@ require_once getAPIPath() . 'autoload.php';
 
 
 
+
+
 function getClient()
 {
 	$client = new Google_Client();
