@@ -25,20 +25,20 @@ $charts = getCharts($analytics);
 
 function getActive()
 {
-	if(isset($_POST["Museum"]))
+	if(isset($_GET["m"]))
 	{
-		if($_POST["Museum"] == "Compare")
+		if($_GET["m"] == "Compare")
 		{
-			print "\"#" . $_POST["Museum"] . "\"";
+			print "\"#" . $_GET["m"] . "\"";
 		}
 		else
 		{
-			print "\"#" . $_POST["Museum"] . "tab\"";
+			print "\"#" . $_GET["m"] . "tab\"";
 		}
 	}
 	else
 	{
-		print "\"#CMPtab\"";
+		print "\"#Compare\"";
 	}
 
 }
@@ -148,8 +148,8 @@ function getActive()
 
 	</ul>
 	
-		<form id='MForm' method='post'>
-			<input id='MuseumID' type='hidden' name='Museum'>
+		<form id='MForm' method='get'>
+			<input id='MuseumID' type='hidden' name='m'>
 		</form>
 
 	

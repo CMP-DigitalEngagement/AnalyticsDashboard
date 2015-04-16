@@ -82,14 +82,14 @@ function getMuseum()
 	$accounts = getAccounts();
 	
 	//Set account to use
-	if(isset($_POST["Museum"]))
+	if(isset($_GET["m"]))
 	{
-		if($_POST["Museum"] == "Compare") return "Compare";
-		$account = $accounts[$_POST["Museum"]];
+		if($_GET["m"] == "Compare") return "Compare";
+		$account = $accounts[$_GET["m"]];
 	}
 	else
 	{
-		$account = $accounts["CMP"];
+		return "Compare";
 	}
 	
 	return $account;
@@ -385,10 +385,10 @@ function setupChart($cname, $ctitle)
 			<h3 class="panel-title"><?php print $ctitle;?></h3>
 		</div>
 		<div class="panel-body">
-		<a href='http://work.drewmcdermott.net/analytics'>
+
 			<div class='chart-holder' id="<?php print $cname;?>">
 			</div>
-			</a>
+
 		</div>
 	</div>
 </div>
