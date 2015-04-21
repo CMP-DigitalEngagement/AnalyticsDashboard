@@ -92,6 +92,18 @@ function cacheExists($datasetName)
 	return false;
 }
 
+function dropCache()
+{
+	$sql = getSql();
+	if($sql != null)
+	{
+		$query = "truncate table datacache";
+		$sql->query($query)
+	}
+	
+
+}
+
 
 
 

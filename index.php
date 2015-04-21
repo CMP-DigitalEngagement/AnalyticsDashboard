@@ -23,6 +23,11 @@ $analytics = new Google_Service_Analytics($client);
 
 $charts = getCharts($analytics);
 
+if(isset($_GET["c"]))
+{
+	if($_GET["c"] == 1) dropCache();
+}
+
 function getActive()
 {
 	if(isset($_GET["m"]))
