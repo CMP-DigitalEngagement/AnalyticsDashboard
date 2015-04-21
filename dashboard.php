@@ -2,7 +2,7 @@
 
 require_once "analytics.php";
 require_once "highcharts.php";
-require_once 'cache.php';
+require_once "cache.php";
 
 
 function getAccounts()
@@ -64,7 +64,14 @@ function getCompData($analytics, $from = '2008-10-01', $to = '', $cache=true)
 		catch (Exception $e)	{ 
 		//var_dump($e);	
 		}
-		//var_dump($data);
+		
+		try
+		{
+			$data["users"][$aname] = invertData(runQuery($analytics, $aval,$from,$to,"ga:newUsers","ga:date","",'10000')->getRows());
+		}
+		catch (Exception $e)	
+		{ }
+
 	}
 	//invertData();
 		if($cache)
@@ -286,7 +293,7 @@ $data = getCompData($analytics);
 $chart = new Highstock();
 $c = 0;
 $hist = $data["hist"];
-//var_dump($data);
+
 foreach($hist as $dname=>$dval)
 {
 	$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
@@ -299,7 +306,7 @@ $charts["hist-views"] = $chart->toChart("#hist");
 $chart = new Highstock();
 $c = 0;
 $cData = $data["duration"];
-//var_dump($data);
+
 foreach($cData as $dname=>$dval)
 {
 	$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
@@ -308,7 +315,18 @@ foreach($cData as $dname=>$dval)
 $chart->addLegend();
 $charts["hist-dur"] = $chart->toChart("#duration");
 
+//Compare Users
+$chart = new Highstock();
+$c = 0;
+$hist = $data["users"];
 
+foreach($hist as $dname=>$dval)
+{
+	$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
+	$c++;
+}
+$chart->addLegend();
+$charts["hist-users"] = $chart->toChart("#users");
 
 }
 
