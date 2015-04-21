@@ -98,7 +98,7 @@ function dropCache()
 	if($sql != null)
 	{
 		$query = "truncate table datacache";
-		$sql->query($query)
+		$sql->query($query);
 	}
 	
 
