@@ -17,6 +17,9 @@ function getColorScheme()
 
 	//light purple
 	array_push($colors, "rgba(205,151,205,1)");
+	
+	//Green-yellow
+	array_push($colors, "rgba(190,205,151,1)");
 
 	
 	return $colors;

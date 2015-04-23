@@ -11,7 +11,16 @@ showErrors();
 
 require_once 'dashboard.php';
 
+if(isset($_GET["c"]))
+{
+	
+	if($_GET["c"] == 1) {
 
+		dropCache();
+	}
+	
+	
+}
 
 
 
@@ -23,16 +32,13 @@ $analytics = new Google_Service_Analytics($client);
 
 $charts = getCharts($analytics);
 
-if(isset($_GET["c"]))
-{
-	if($_GET["c"] == 1) dropCache();
-}
+
 
 function getActive()
 {
 	if(isset($_GET["m"]))
 	{
-		if($_GET["m"] == "Compare")
+		if($_GET["m"] == "Compare" || $_GET["m"] == "Combined")
 		{
 			print "\"#" . $_GET["m"] . "\"";
 		}
@@ -43,7 +49,7 @@ function getActive()
 	}
 	else
 	{
-		print "\"#Compare\"";
+		print "\"#Combined\"";
 	}
 
 }
@@ -140,8 +146,10 @@ function getActive()
 <body>
 	<ul id='main-nav' class="nav nav-tabs">
 		<li id='Compare' role="presentation"><a href="#">Compare</a></li>
+		
+		<li id='Combined' role="presentation" class="active"><a href="#">Combined</a></li>
 	
-		<li id='CMPtab' role="presentation" class="active"><a href="#">Central</a></li>
+		<li id='CMPtab' role="presentation" ><a href="#">Central</a></li>
 
 		<li id='CMOAtab' role="presentation" ><a href="#">CMOA</a></li>
 
@@ -163,17 +171,19 @@ function getActive()
 	<div id='Panel' class='main-panel container'>
 		
 		<?php 
-		if(getMuseum() != "Compare")
-		{		
-		setupCharts(
-			array("web-traffic","web-byhour","mobile-os","web-browser","most-viewed","hist-views","tos"),
-			array("Overall Web Traffic","Web Traffic by Hour","Mobile Operating Systems","Web Browsers","Most Viewed Pages","Historical Page Views","Time on Site"));
+		if(getMuseum() == "Compare")
+		{	
+
+			setupCharts(
+			array("hist","duration","users"),
+			array("Historical Pageviews","Average Time on Site","New Users"));		
 		}
 		else
 		{
 			setupCharts(
-				array("hist","duration","users"),
-				array("Historical Pageviews","Average Time on Site","New Users"));
+			array("web-traffic","web-byhour","mobile-os","web-browser","most-viewed","hist-views","tos"),
+			array("Overall Web Traffic","Web Traffic by Hour","Mobile Operating Systems","Web Browsers","Most Viewed Pages","Historical Page Views","Time on Site"));
+
 		
 		}
 			?>

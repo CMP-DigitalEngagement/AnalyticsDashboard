@@ -12,7 +12,7 @@ function getAccounts()
 	$accounts["CSC"] = "ga:12575410";
 	$accounts["CMNH"] = "ga:19917087"; //"ga:86907168";
 	$accounts["AWM"] = "ga:30663551";
-	$accounts["CMP"] = "";
+	$accounts["CMP"] = "ga:43375288";
 	
 	return $accounts;
 }
@@ -32,7 +32,11 @@ function fromGDateHour($gTime)
 	
 	return $year . "-" . $mon . "-" . $day . " " . $hr . ":00";
 }
-
+function getTotalData($analytics, $from = '2008-10-01', $to = '', $cache=true)
+{
+	$accounts = getAccounts();
+	
+}
 function getCompData($analytics, $from = '2008-10-01', $to = '', $cache=true)
 {
 	if($to == '') $to = GDate();
@@ -49,13 +53,14 @@ function getCompData($analytics, $from = '2008-10-01', $to = '', $cache=true)
 	$acct = getAccounts();
 	foreach($acct as $aname=>$aval)
 	{
+		//var_dump($aname);
 
 		try
 		{
 			$data["hist"][$aname] = invertData(runQuery($analytics, $aval,$from,$to,"ga:pageviews","ga:date","",'10000')->getRows());
 		}
 		catch (Exception $e)	
-		{ }
+		{}
 		
 		try
 		{
@@ -74,11 +79,10 @@ function getCompData($analytics, $from = '2008-10-01', $to = '', $cache=true)
 
 	}
 	//invertData();
-		if($cache)
-	{
+
 		$cData = serialize ($data);
 		storeInCache("COMP" . "@" . $from . "@" . $to, $cData);
-	}
+	
 	
 	return $data;
 
@@ -102,11 +106,12 @@ function getMuseum()
 	return $account;
 }
 
-function getData($analytics, $from = "2015-01-01", $to = "2015-01-31", $cache=true)
+function getData($analytics, $account =  '', $from = "2015-01-01", $to = "2015-01-31", $cache=true)
 {
 	//$to = '2015-03-10';
-
-	$account = getMuseum();
+	if ($account = '')
+		$account = getMuseum();
+	
 	$data = array();
 	//check cache for dataset
 	if($cache)
@@ -161,11 +166,10 @@ function getData($analytics, $from = "2015-01-01", $to = "2015-01-31", $cache=tr
 	
 	
 	
-	if($cache)
-	{
+
 		$cData = serialize ($data);
 		storeInCache($account . "@" . $from . "@" . $to, $cData);
-	}
+	
 	return $data;
 }
 
@@ -289,6 +293,7 @@ if(isset($data["hist-views"]))
 else
 {
 $data = getCompData($analytics);
+//print_r($data);
 //Compare Views
 $chart = new Highstock();
 $c = 0;
