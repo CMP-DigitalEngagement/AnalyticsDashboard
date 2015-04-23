@@ -37,9 +37,13 @@ function getTotalData($analytics, $from = '2008-10-01', $to = '', $cache=true)
 	$accounts = getAccounts();
 	
 }
-function getCompData($analytics, $from = '2008-10-01', $to = '', $cache=true)
+function getCompData($analytics, $from = '', $to = '', $cache=true)
 {
 	if($to == '') $to = GDate();
+	
+	if($from == '')
+		$from = GDate(strtotime( '-3 year'));
+	
 	
 	//check cache for dataset
 	if($cache)
@@ -53,7 +57,7 @@ function getCompData($analytics, $from = '2008-10-01', $to = '', $cache=true)
 	$acct = getAccounts();
 	foreach($acct as $aname=>$aval)
 	{
-		//var_dump($aname);
+		
 
 		try
 		{
@@ -67,7 +71,7 @@ function getCompData($analytics, $from = '2008-10-01', $to = '', $cache=true)
 			$data["duration"][$aname] = invertData(runQuery($analytics, $aval,$from,$to,"ga:avgSessionDuration","ga:date","",'10000')->getRows());
 		}
 		catch (Exception $e)	{ 
-		//var_dump($e);	
+			
 		}
 		
 		try
@@ -96,21 +100,28 @@ function getMuseum()
 	if(isset($_GET["m"]))
 	{
 		if($_GET["m"] == "Compare") return "Compare";
+		if($_GET["m"] == "Combined") return "Combined";
 		$account = $accounts[$_GET["m"]];
 	}
 	else
 	{
-		return "Compare";
+		return "Combined";
 	}
 	
 	return $account;
 }
 
-function getData($analytics, $account =  '', $from = "2015-01-01", $to = "2015-01-31", $cache=true)
+function getData($analytics, $account =  '', $from = "", $to = "", $cache=true)
 {
 	//$to = '2015-03-10';
-	if ($account = '')
+	if ($account == '')
 		$account = getMuseum();
+		
+	if($from == '')
+		$from = GDate(strtotime( '-1 month'));
+	
+	if($to == '')
+		$to = GDate();
 	
 	$data = array();
 	//check cache for dataset
@@ -177,163 +188,170 @@ function getCharts($analytics)
 {
 $charts = array();
 $colors = getColorScheme();
-if(getMuseum() != "Compare")
+
+
+if(getMuseum() == "Compare")
 {
-$data = getData($analytics);
-
-
-
-//Overall web traffic
-
-if(isset($data["web-traffic"]))
-{
-	$wt = invertData($data["web-traffic"]);
-
-	$start = strtotime($wt[0][0]);
-	$int = strtotime($wt[0][1]) - strtotime($wt[0][0]);
-
-	$areaspline = new Highchart('areaspline');
-	$areaspline->addLegend();
-	$areaspline->addPlotOption('fillOpacity',0.2);
-	$areaspline->addSeries($wt[1],'Pageviews',$colors[3]);
-	$areaspline->addSeries($wt[2],'Sessions',$colors[2]);
-	$areaspline->addSeries($wt[3],'Users',$colors[1]);
-	$areaspline->addTimestamps($start*1000, $int*1000);
-
-	$charts["web-traffic"] = $areaspline->toChart("#web-traffic");
-}
-
-if(isset($data["mobile-os"]))
-{
-	$mos = invertData($data["mobile-os"]);
-	
-	$bar = new Highchart('bar');
-	$bar->addCategories($mos[0]);
-	$bar->addSeries($mos[1],'Users', $colors[1]);
-	//$bar->addDrilldownSeries(array('1','2','3'), array(14,12,2), array('1'=>array('test1'=>6,'test2'=>8)), 'Drilldown', $colors[0]);
-	$charts["mobile-os"] = $bar->toChart("#mobile-os");
-
-}
-
-if(isset($data["web-byhour"]))
-{
-	$wt = invertData($data["web-byhour"]);
-
-	$start = strtotime("12am");
-	$int = strtotime("1 hour");
-
-	$areaspline = new Highchart('areaspline');
-	$areaspline->addLegend();
-	$areaspline->addPlotOption('fillOpacity',0.2);
-	$areaspline->addSeries($wt[1],'Pageviews',$colors[3]);
-	$areaspline->addSeries($wt[2],'Sessions',$colors[2]);
-	$areaspline->addSeries($wt[3],'Users',$colors[1]);
-	$areaspline->addCategories(hours(), 3);
-	$charts["web-byhour"] = $areaspline->toChart("#web-byhour");
-
-}
-
-if(isset($data["web-browser"]))
-{
-	$wb = invertData($data["web-browser"]);
-	
-	$bar = new Highchart('bar');
-	$bar->addCategories($wb[0]);
-	$bar->addSeries($wb[1],'Users', $colors[0]);
-	$charts["web-browser"] = $bar->toChart("#web-browser");
-
-}
-
-if(isset($data["most-viewed"]))
-{
-	$id = invertData($data["most-viewed"]);
-	
-	//var_dump($id);
-	
-	$bar = new Highchart('bar');
-	$bar->addCategories($id[0]);
-	$bar->addSeries($id[1],'Views', $colors[2]);
-	$charts["most-viewed"] = $bar->toChart("#most-viewed");
-
-}
-
-if(isset($data["tos"]))
-{
-	$id = invertData($data["tos"]);
-	
-	$chart = new Highchart('areaspline');
-	
-	$start = strtotime(($id[0][0])) * 1000;
-	$int = (strtotime(($id[0][1])) - strtotime(($id[0][0]))) * 1000;
-	$chart->addTimestamps($start, $int);
-	$chart->addLegend();
-	//$chart->addPlotOption('fillOpacity',0.2);
-	$chart->addSeries($id[2],"Avg. Time on Site (s)", $colors[1]);
-	$chart->addSeries($id[1],"Avg. Time on Page (s)", $colors[0]);
-	
-	$charts["tos"] = $chart->toChart("#tos");
-	
-	
-}
-
-if(isset($data["hist-views"]))
-{
-	$id = invertData($data["hist-views"]);
-	
-	//var_dump($id);
-	
+	$data = getCompData($analytics);
+	//print_r($data);
+	//Compare Views
 	$chart = new Highstock();
-	$chart->addSeries($id[0], $id[1],'Views', $colors[3]);
-	$charts["hist-views"] = $chart->toChart("#hist-views");
+	$c = 0;
+	$hist = $data["hist"];
 
+	foreach($hist as $dname=>$dval)
+	{
+		$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
+		$c++;
+	}
+	$chart->addLegend();
+	$charts["hist-views"] = $chart->toChart("#hist");
+
+	//Compare Duration
+	$chart = new Highstock();
+	$c = 0;
+	$cData = $data["duration"];
+
+	foreach($cData as $dname=>$dval)
+	{
+		$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
+		$c++;
+	}
+	$chart->addLegend();
+	$charts["hist-dur"] = $chart->toChart("#duration");
+
+	//Compare Users
+	$chart = new Highstock();
+	$c = 0;
+	$hist = $data["users"];
+
+	foreach($hist as $dname=>$dval)
+	{
+		$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
+		$c++;
+	}
+	$chart->addLegend();
+	$charts["hist-users"] = $chart->toChart("#users");
 }
-
+else if (getMuseum() == "Compare")
+{
 
 }
 else
 {
-$data = getCompData($analytics);
-//print_r($data);
-//Compare Views
-$chart = new Highstock();
-$c = 0;
-$hist = $data["hist"];
+	$data = getData($analytics);
+	
+	
 
-foreach($hist as $dname=>$dval)
-{
-	$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
-	$c++;
+
+
+	//Overall web traffic
+
+	if(isset($data["web-traffic"]))
+	{
+		$wt = invertData($data["web-traffic"]);
+
+		$start = strtotime($wt[0][0]);
+		$int = strtotime($wt[0][1]) - strtotime($wt[0][0]);
+
+		$areaspline = new Highchart('areaspline');
+		$areaspline->addLegend();
+		$areaspline->addPlotOption('fillOpacity',0.2);
+		$areaspline->addSeries($wt[1],'Pageviews',$colors[3]);
+		$areaspline->addSeries($wt[2],'Sessions',$colors[2]);
+		$areaspline->addSeries($wt[3],'Users',$colors[1]);
+		$areaspline->addTimestamps($start*1000, $int*1000);
+
+		$charts["web-traffic"] = $areaspline->toChart("#web-traffic");
+	}
+
+	if(isset($data["mobile-os"]))
+	{
+		$mos = invertData($data["mobile-os"]);
+		
+		$bar = new Highchart('bar');
+		$bar->addCategories($mos[0]);
+		$bar->addSeries($mos[1],'Users', $colors[1]);
+		//$bar->addDrilldownSeries(array('1','2','3'), array(14,12,2), array('1'=>array('test1'=>6,'test2'=>8)), 'Drilldown', $colors[0]);
+		$charts["mobile-os"] = $bar->toChart("#mobile-os");
+
+	}
+
+	if(isset($data["web-byhour"]))
+	{
+		$wt = invertData($data["web-byhour"]);
+
+		$start = strtotime("12am");
+		$int = strtotime("1 hour");
+
+		$areaspline = new Highchart('areaspline');
+		$areaspline->addLegend();
+		$areaspline->addPlotOption('fillOpacity',0.2);
+		$areaspline->addSeries($wt[1],'Pageviews',$colors[3]);
+		$areaspline->addSeries($wt[2],'Sessions',$colors[2]);
+		$areaspline->addSeries($wt[3],'Users',$colors[1]);
+		$areaspline->addCategories(hours(), 3);
+		$charts["web-byhour"] = $areaspline->toChart("#web-byhour");
+
+	}
+
+	if(isset($data["web-browser"]))
+	{
+		$wb = invertData($data["web-browser"]);
+		
+		$bar = new Highchart('bar');
+		$bar->addCategories($wb[0]);
+		$bar->addSeries($wb[1],'Users', $colors[0]);
+		$charts["web-browser"] = $bar->toChart("#web-browser");
+
+	}
+
+	if(isset($data["most-viewed"]))
+	{
+		$id = invertData($data["most-viewed"]);
+		
+		
+		
+		$bar = new Highchart('bar');
+		$bar->addCategories($id[0]);
+		$bar->addSeries($id[1],'Views', $colors[2]);
+		$charts["most-viewed"] = $bar->toChart("#most-viewed");
+
+	}
+
+	if(isset($data["tos"]))
+	{
+		$id = invertData($data["tos"]);
+		
+		$chart = new Highchart('areaspline');
+		
+		$start = strtotime(($id[0][0])) * 1000;
+		$int = (strtotime(($id[0][1])) - strtotime(($id[0][0]))) * 1000;
+		$chart->addTimestamps($start, $int);
+		$chart->addLegend();
+		//$chart->addPlotOption('fillOpacity',0.2);
+		$chart->addSeries($id[2],"Avg. Time on Site (s)", $colors[1]);
+		$chart->addSeries($id[1],"Avg. Time on Page (s)", $colors[0]);
+		
+		$charts["tos"] = $chart->toChart("#tos");
+		
+		
+	}
+
+	if(isset($data["hist-views"]))
+	{
+		$id = invertData($data["hist-views"]);
+		
+		
+		
+		$chart = new Highstock();
+		$chart->addSeries($id[0], $id[1],'Views', $colors[3]);
+		$charts["hist-views"] = $chart->toChart("#hist-views");
+
+	}
+
 }
-$chart->addLegend();
-$charts["hist-views"] = $chart->toChart("#hist");
 
-//Compare Duration
-$chart = new Highstock();
-$c = 0;
-$cData = $data["duration"];
-
-foreach($cData as $dname=>$dval)
-{
-	$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
-	$c++;
-}
-$chart->addLegend();
-$charts["hist-dur"] = $chart->toChart("#duration");
-
-//Compare Users
-$chart = new Highstock();
-$c = 0;
-$hist = $data["users"];
-
-foreach($hist as $dname=>$dval)
-{
-	$chart->addSeries($dval[0],$dval[1],$dname,$colors[$c]);
-	$c++;
-}
-$chart->addLegend();
-$charts["hist-users"] = $chart->toChart("#users");
-
-}
 
 return $charts;
 

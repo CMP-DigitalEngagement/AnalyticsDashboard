@@ -80,7 +80,9 @@ function getActive()
 				
 				//Get museum ID
 				var id = $(this).attr("id");
-				if(id != 'Compare')
+				if(id == 'Compare' || id == 'Combined')
+				{}
+				else
 				{
 					id = id.substring(0,id.length - 3);
 				}
