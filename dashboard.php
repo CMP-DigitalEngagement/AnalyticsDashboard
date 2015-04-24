@@ -32,9 +32,16 @@ function fromGDateHour($gTime)
 	
 	return $year . "-" . $mon . "-" . $day . " " . $hr . ":00";
 }
-function getTotalData($analytics, $from = '2008-10-01', $to = '', $cache=true)
+function getTotalData($analytics, $from = '', $to = '', $cache=true)
 {
+	
 	$accounts = getAccounts();
+	$data = array();
+	foreach($accounts as $aname=>$aval)
+	{
+		$data[$aname] = getData($analytics,$aval,$from,$to,$cache);
+	}
+	return $data;
 	
 }
 function getCompData($analytics, $from = '', $to = '', $cache=true)
@@ -111,7 +118,7 @@ function getMuseum()
 	return $account;
 }
 
-function getData($analytics, $account =  '', $from = "", $to = "", $cache=true)
+function getData($analytics, $account =  '', $from = "", $to = "", $ltfrom = "", $cache=true)
 {
 	//$to = '2015-03-10';
 	if ($account == '')
@@ -119,6 +126,9 @@ function getData($analytics, $account =  '', $from = "", $to = "", $cache=true)
 		
 	if($from == '')
 		$from = GDate(strtotime( '-1 month'));
+		
+	if($ltfrom == '')
+		$ltfrom = GDate(strtotime( '-3 years'));
 	
 	if($to == '')
 		$to = GDate();
@@ -137,41 +147,41 @@ function getData($analytics, $account =  '', $from = "", $to = "", $cache=true)
 	//Mobile OS data
 	try
 	{
-		$data["mobile-os"] = runQuery($analytics, $account,$from,$to,"ga:users","ga:operatingSystem","-ga:users",'5','','gaid::-11')->getRows();
+		$data["mobile-os"] = invertData(runQuery($analytics, $account,$from,$to,"ga:users","ga:operatingSystem","-ga:users",'5','','gaid::-11')->getRows());
 	}
 	catch (Exception $e)	{	}
 	//web traffic
 	try
 	{
-		$data["web-traffic"] = runQuery($analytics, $account,$from,$to,"ga:pageviews,ga:visits,ga:users","ga:date")->getRows();
+		$data["web-traffic"] = invertData(runQuery($analytics, $account,$from,$to,"ga:pageviews,ga:visits,ga:users","ga:date")->getRows());
 	}
 	catch (Exception $e)	{	}
 	
 	try
 	{
-		$data["web-byhour"] = runQuery($analytics, $account,$from,$to,"ga:pageviews,ga:visits,ga:users","ga:hour")->getRows();
+		$data["web-byhour"] = invertData(runQuery($analytics, $account,$from,$to,"ga:pageviews,ga:visits,ga:users","ga:hour")->getRows());
 	}
 	catch (Exception $e)	{	}
 	
 	try
 	{
-		$data["web-browser"] = runQuery($analytics, $account,$from,$to,"ga:users","ga:browser","-ga:users",'5','ga:deviceCategory==desktop')->getRows();
+		$data["web-browser"] = invertData(runQuery($analytics, $account,$from,$to,"ga:users","ga:browser","-ga:users",'5','ga:deviceCategory==desktop')->getRows());
 	}
 	catch (Exception $e)	{	}
 	
 	try
 	{
-		$data["most-viewed"] = runQuery($analytics, $account,$from,$to,"ga:pageviews","ga:pagePath","-ga:pageviews",'15')->getRows();
+		$data["most-viewed"] =invertData( runQuery($analytics, $account,$from,$to,"ga:pageviews","ga:pagePath","-ga:pageviews",'15')->getRows());
 	}
 	catch (Exception $e)	{	}
 		try
 	{
-		$data["hist-views"] = runQuery($analytics, $account,'2008-10-01',$to,"ga:pageviews","ga:date","",'10000')->getRows();
+		$data["hist-views"] = invertData(runQuery($analytics, $account,$ltfrom,$to,"ga:pageviews","ga:date","",'10000')->getRows());
 	}
 	catch (Exception $e)	{	}
 		try
 	{
-		$data["tos"] = runQuery($analytics, $account,$from,$to,"ga:avgTimeOnPage,ga:avgSessionDuration","ga:date","",'10000')->getRows();
+		$data["tos"] = invertData(runQuery($analytics, $account,$from,$to,"ga:avgTimeOnPage,ga:avgSessionDuration","ga:date","",'10000')->getRows());
 	}
 	catch (Exception $e)	{	}
 	
@@ -233,9 +243,33 @@ if(getMuseum() == "Compare")
 	$chart->addLegend();
 	$charts["hist-users"] = $chart->toChart("#users");
 }
-else if (getMuseum() == "Compare")
+else if (getMuseum() == "Combined")
 {
-
+	$data = getTotalData($analytics);
+	
+	$chart = new Highchart('areaspline');
+	$chart->addLegend();
+	$chart->addPlotOption('fillOpacity',0.333);
+	$chart->addPlotOption('stacking','normal');
+	
+	$first = true;
+	$c = 0;
+	foreach($data as $mname=>$mval)
+	{
+		$wt = $mval["web-traffic"];
+		if($first)
+		{
+			$start = strtotime($wt[0][0]);
+			$int = strtotime($wt[0][1]) - strtotime($wt[0][0]);
+			$chart->addTimestamps($start*1000, $int*1000);
+			$first = false;
+		}
+		$chart->addSeries($wt[1],$mname,$colors[$c]);
+		$c++;
+	}
+	$charts["web-traffic"] = $chart->toChart("#views");
+	
+	
 }
 else
 {
@@ -249,7 +283,7 @@ else
 
 	if(isset($data["web-traffic"]))
 	{
-		$wt = invertData($data["web-traffic"]);
+		$wt = $data["web-traffic"];
 
 		$start = strtotime($wt[0][0]);
 		$int = strtotime($wt[0][1]) - strtotime($wt[0][0]);
@@ -267,7 +301,7 @@ else
 
 	if(isset($data["mobile-os"]))
 	{
-		$mos = invertData($data["mobile-os"]);
+		$mos = $data["mobile-os"];
 		
 		$bar = new Highchart('bar');
 		$bar->addCategories($mos[0]);
@@ -279,7 +313,7 @@ else
 
 	if(isset($data["web-byhour"]))
 	{
-		$wt = invertData($data["web-byhour"]);
+		$wt = $data["web-byhour"];
 
 		$start = strtotime("12am");
 		$int = strtotime("1 hour");
@@ -297,7 +331,7 @@ else
 
 	if(isset($data["web-browser"]))
 	{
-		$wb = invertData($data["web-browser"]);
+		$wb = $data["web-browser"];
 		
 		$bar = new Highchart('bar');
 		$bar->addCategories($wb[0]);
@@ -308,7 +342,7 @@ else
 
 	if(isset($data["most-viewed"]))
 	{
-		$id = invertData($data["most-viewed"]);
+		$id = $data["most-viewed"];
 		
 		
 		
@@ -321,7 +355,7 @@ else
 
 	if(isset($data["tos"]))
 	{
-		$id = invertData($data["tos"]);
+		$id = $data["tos"];
 		
 		$chart = new Highchart('areaspline');
 		
@@ -340,7 +374,7 @@ else
 
 	if(isset($data["hist-views"]))
 	{
-		$id = invertData($data["hist-views"]);
+		$id = $data["hist-views"];
 		
 		
 		

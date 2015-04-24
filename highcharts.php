@@ -102,7 +102,7 @@ class Highchart
 		$this->chart['legend']['verticalAlign'] = 'top';
 		$this->chart['legend']['floating'] = true;
 		$this->chart['legend']['borderWidth'] = 0;
-		$this->chart['legend']['backgroundColor'] = 'white';
+		$this->chart['legend']['backgroundColor'] = 'transparent';
 	}
 	
 	public function addCategories($cats, $step =1)

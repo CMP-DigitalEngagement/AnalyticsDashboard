@@ -180,6 +180,12 @@ function getActive()
 			array("hist","duration","users"),
 			array("Historical Pageviews","Average Time on Site","New Users"));		
 		}
+		else if(getMuseum() == "Combined")
+		{
+			setupCharts(
+			array("views"),
+			array("Web Traffic (Pageviews)"));
+		}
 		else
 		{
 			setupCharts(
