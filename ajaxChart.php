@@ -24,11 +24,8 @@ if (is_ajax() || true) //Remove TRUE when done testing
 {
   if (isset($_GET["chart"]) && !empty($_GET["chart"])) { //Checks if action value exists
 
-    $action = $_GET["chart"];
-		switch($action) { //Switch case for value of action
-			case "web-traffic" : chartWebTraffic(); break;
+    getChart();
 
-		}
 	}
 }
 function is_ajax()
@@ -74,6 +71,29 @@ function GoogleDate($time = '')
 	return date('Y-m-d', $time);
 }
 
+function hours()
+{
+
+	$app = array("am","pm");
+	$res = array();
+	for($i = 0; $i < 2; $i++)
+	{
+		for($j = 0; $j < 12; $j++)
+		{
+			if($j == 0)
+			{
+				array_push($res,"12 " . $app[$i]);
+			}
+			else
+			{
+				array_push($res,$j . " " . $app[$i]);
+			}
+		}
+
+	}
+	return $res;
+}
+
 function throwError($message, $function)
 {
   $return = array();
@@ -100,10 +120,10 @@ function getSettings()
   $settings = array();
 
   //Get settings
+  $settings["Chart"] = tryGet("chart");
   $settings["Account"] = tryGet("account");
   $settings["From"] = tryGet("from");
   $settings["To"] = tryGet("to");
-  $settings["Chart"] = tryGet("chart");
 
   //Validate settings
   if(empty($settings["Account"]))
@@ -125,35 +145,68 @@ function getSettings()
 
 function dataSetName($settings)
 {
+  $res = "";
+  foreach ($settings as $k => $s) {
+    $res .= "$k=$s;";
+  }
 
-  return "chart=" . $settings["Chart"] . ";account=" . $settings["Account"] . ";from=" . $settings["From"] . ";to=" . $settings["To"] . ";";
+  return $res;
+}
 
+function getChart()
+{
+    $set = getSettings();
+
+    //Check if this chart already exists in cache
+    $ds = dataSetName($set);
+    if(checkCache($ds))
+    {
+        $chart = loadFromCache($ds);
+    }
+    else
+    {
+      //Now determine which chart to get
+
+      switch($set["Chart"])
+      {
+        case "web-traffic" : $chart = chartWebTraffic($set); break;
+        case "mobile-os" : $chart = chartMobileOS($set); break;
+        case "traffic-hourly" : $chart = chartTrafficHourly($set); break;
+
+
+        //Not found
+        default: $chart = null;  break;
+
+      }
+      if(!empty($chart))
+      {
+          storeInCache($ds, $chart);
+      }
+    }
+
+    print $chart;
 }
 
 /* Charts */
-function chartWebTraffic()
+function chartWebTraffic($settings)
 {
-  //Get settings
-  $set = getSettings();
+  //Setup analytics
   $analytics = getAnalytics();
-  $colors = getColorScheme();
 
   //Get data
-  $ds = dataSetName($set);
-  if(checkCache($ds))
-  {
-      $data = unserialize(loadFromCache($ds));
-  }
-  else
-  {
-    $data = invertData(runQuery($analytics, $set["Account"],$set["From"],$set["To"],"ga:pageviews,ga:visits,ga:users","ga:date")->getRows());
-    $dataS = serialize($data);
-    storeInCache($ds, $dataS);
-  }
+  $colors = getColorScheme();
 
+  try
+  {
+    $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:pageviews,ga:visits,ga:users","ga:date")->getRows());
+  }
+  catch (Exception $e)
+  {
+    return NULL;
+  }
 
   //Form chart
-  $start = strtotime($set["From"]);
+  $start = strtotime(strtotime($data[0][0]));
   $int = strtotime($data[0][1]) - strtotime($data[0][0]);
   $chart = new Highchart('areaspline');
   $chart->addLegend();
@@ -163,9 +216,64 @@ function chartWebTraffic()
   $chart->addSeries($data[3],'Users',$colors[1]);
   $chart->addTimestamps($start*1000,$int*1000);
 
-  print $chart->toJson();
-
+  return $chart->toJson();
 }
+
+function chartMobileOS($settings)
+{
+  //Setup analytics
+  $analytics = getAnalytics();
+
+  //Get data
+  $colors = getColorScheme();
+  try
+  {
+    $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:users","ga:operatingSystem","-ga:users",'5','','gaid::-11')->getRows());
+  }
+  catch (Exception $e)
+  {
+    return NULL;
+  }
+
+  $chart = new Highchart('bar');
+  $chart->addCategories($data[0]);
+  $chart->addSeries($data[1],'Users', $colors[1]);
+
+  return $chart->toJson();
+}
+
+function chartTrafficHourly($settings)
+{
+  //Setup analytics
+  $analytics = getAnalytics();
+
+  //Get data
+  $colors = getColorScheme();
+  try
+  {
+      $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:pageviews,ga:visits,ga:users","ga:hour")->getRows());
+  }
+  catch (Exception $e)
+  {
+    return NULL;
+  }
+
+
+  $start = strtotime("12am");
+  $int = strtotime("1 hour");
+
+  $chart = new Highchart('areaspline');
+  $chart->addLegend();
+  $chart->addPlotOption('fillOpacity',0.2);
+  $chart->addSeries($data[1],'Pageviews',$colors[3]);
+  $chart->addSeries($data[2],'Sessions',$colors[2]);
+  $chart->addSeries($data[3],'Users',$colors[1]);
+  $chart->addCategories(hours(), 3);
+
+  return $chart->toJSON();
+}
+
+
 
 
 
