@@ -5,30 +5,30 @@ class Highchart
 {
 	var $chart = array();
 	var $chart_type = '';
-	public function __construct($type='') 
+	public function __construct($type='')
 	{
 		//Here we setup some standard fields
 		$this->chart = array();
 		$this->chart['chart'] = array();
-		
+
 		$this->chart['title'] = array();
 		$this->chart['tooltip'] = array();
 		$this->chart['credits'] = array();
 		$this->chart['yAxis'] = array();
 		//$this->chart['xAxis'] = array();
-		
-		
-		
+
+
+
 		$this->chart['series'] = array();
-		
+
 		$this->chart['credits']['enabled'] = false;
 		$this->chart['tooltip']['shared'] = true;
 		$this->chart['tooltip']['valueSuffix'] ='';
 		$this->chart['title']['text'] = '';
 		$this->chart['yAxis']['title'] = array();
 		$this->chart['yAxis']['title']['text'] = '';
-		
-		
+
+
 		//If type is set add some more standard settings
 		if(!empty($type))
 		{
@@ -37,26 +37,26 @@ class Highchart
 			//$this->chart['plotOptions'][$type] = array();
 		}
 	}
-	
+
 	function correctData($data)
 	{
 		$newdata = array();
 		foreach($data as $d)
 		{
-			array_push($newdata, intval($d));
+			array_push($newdata, floatval($d));
 		}
-		
+
 		return $newdata;
-	
+
 	}
-	
+
 	public function setType($type)
 	{
 		$this->chart['chart']['type'] = $type;
 		//$this->chart['plotOptions'][$type] = array();
 		$this->chart_type = $type;
 	}
-	
+
 	public function addPlotOption($option, $value)
 	{
 		if(!empty($this->chart_type))
@@ -69,7 +69,7 @@ class Highchart
 			{
 				$this->chart['plotOptions'][$this->chart_type] = array();
 			}
-			
+
 			$this->chart['plotOptions'][$this->chart_type][$option] = $value;
 		}
 		else
@@ -82,19 +82,19 @@ class Highchart
 		$this->chart['xAxis']['type'] = "datetime";
 		$this->addPlotOption("pointInterval", $interval);
 		$this->addPlotOption("pointStart",$start);
-	
+
 	}
-	
+
 	public function setTitle($title)
 	{
 		$this->chart['title']['text'] = $title;
 	}
-	
+
 	public function setYAxisLabel($label)
 	{
 		$this->chart['yAxis']['title']['text'] = $label;
 	}
-	
+
 	public function addLegend()
 	{
 		$this->chart['legend']['layout'] = 'horizontal';
@@ -104,7 +104,7 @@ class Highchart
 		$this->chart['legend']['borderWidth'] = 0;
 		$this->chart['legend']['backgroundColor'] = 'transparent';
 	}
-	
+
 	public function addCategories($cats, $step =1)
 	{
 		$this->chart['xAxis']["categories"] = $cats;
@@ -114,23 +114,23 @@ class Highchart
 			$this->chart['xAxis']['labels']['step'] = $step;
 		}
 	}
-	
+
 	public function addPlotBand($from, $to, $color)
 	{
 		if(is_null($this->chart['xAxis']['plotBands']))
 		{
 			$this->chart['xAxis']['plotBands'] = array();
 		}
-		
+
 		$newPlot = array();
 		$newPlot['from'] = $from;
 		$newPlot['to'] = $to;
 		$newPlot['color'] = $color;
-		
+
 		array_push($this->chart['xAxis']['plotBands'], $newPlot);
-		
+
 	}
-	
+
 	public function addSeries($data, $name='', $color='')
 	{
 		$newSeries = array();
@@ -143,19 +143,19 @@ class Highchart
 		{
 		$newSeries['color'] = $color;
 		}
-		
+
 		array_push($this->chart['series'],$newSeries);
 	}
-	
+
 	/* Requires Drilldown Module */
 	public function addDrilldownSeries($labels, $data, $subdata, $name='', $color='')
 	{
 		$this->chart['xAxis']['type']= 'category';
-	
+
 		/* Create the series */
-		
+
 		$newSeries = array();
-		
+
 		if(!empty($name))
 		{
 			$newSeries['name'] = $name;
@@ -164,9 +164,9 @@ class Highchart
 		{
 			$newSeries['color'] = $color;
 		}
-		
+
 		$newSeries['data'] = array();
-		
+
 		$ddLabel = array();
 
 		for($i = 0; $i < count($data); $i++)
@@ -178,14 +178,14 @@ class Highchart
 			$dataPoint['drilldown'] = $ddLabel[$i];
 			array_push($newSeries['data'], $dataPoint);
 		}
-		
+
 		array_push($this->chart['series'],$newSeries);
 		/* Create the drilldowns */
 		if(!isset($this->chart['drilldown']['series']))
 		{
 			$this->chart['drilldown']['series'] = array();
 		}
-		
+
 		for($i = 0; $i < count($labels); $i++)
 		{
 			$label = $labels[$i];
@@ -205,16 +205,16 @@ class Highchart
 				array_push($this->chart['drilldown']['series'], $ddSeries);
 			}
 		}
-		
-		
-		
+
+
+
 	}
-	
+
 	public function addDrilldown($seriesName, $data)
 	{
 		$ser = $this->chart['series'];
 		$ns = count($ser);
-		
+
 		$ddS = -1;
 		for($i = 0; $i < $ns; $i++)
 		{
@@ -225,16 +225,16 @@ class Highchart
 				break;
 			}
 		}
-		
+
 		if($ddS > -1)
 		{
 			$this->chart['series'][$ddS]['drilldown'] = "DD" . $seriesName;
-			
+
 			if(!isset($this->chart['drilldown']['series']))
 			{
 				$this->chart['drilldown']['series'] = array();
 			}
-			
+
 			$newDD = array();
 			$newDD['id'] = "DD" . $seriesName;
 			$newDD['data'] = array();
@@ -249,24 +249,24 @@ class Highchart
 			array_push($this->chart['drilldown']['series'],$newDD);
 		}
 	}
-	
-	
+
+
 	/* Import / Export data functions */
-	
+
 	public function importArray()
 	{
-	
+
 	}
-	
+
 	public function getArray()
 	{
 		return $this->chart;
-	}	
+	}
 	public function toJSON()
 	{
 		return str_replace("},","},\n",json_encode($this->chart));
 	}
-	
+
 	public function toChart($selector)
 	{
 		return "$('" . $selector . "').highcharts(\n" . $this->toJSON() . "\n);\n\n";
@@ -277,10 +277,10 @@ class Highchart
 
 class Highstock
 {
-	public function __construct() 
+	public function __construct()
 	{
 		$chart = array();
-		
+
 		$this->chart['title'] = array();
 
 		$this->chart['title']['text'] = '';
@@ -291,11 +291,11 @@ class Highstock
 	}
 
 
-	
+
 		public function addSeries($time, $data, $name='', $color='')
 	{
 		$newSeries = array();
-		
+
 		if(!empty($name))
 		{
 		$newSeries['name'] = $name;
@@ -304,11 +304,11 @@ class Highstock
 		{
 		$newSeries['color'] = $color;
 		}
-		
+
 		$newSeries['type'] = 'spline';
-		
+
 		$newSeries['data'] = $this->correctData($time, $data);
-		
+
 		array_push($this->chart['series'],$newSeries);
 	}
 	function correctData($time, $data)
@@ -321,11 +321,11 @@ class Highstock
 			array_push($newdata, array($dt, intval($d)));
 			$i++;
 		}
-		
+
 		return $newdata;
-	
+
 	}
-	
+
 		public function addLegend()
 	{
 		$this->chart['legend'] = array();
@@ -336,12 +336,12 @@ class Highstock
 		$this->chart['legend']['borderWidth'] = 0;
 		$this->chart['legend']['backgroundColor'] = 'white';
 	}
-	
+
 	public function toJSON()
 	{
 		return str_replace("},","},\n",json_encode($this->chart));
 	}
-	
+
 	public function toChart($selector)
 	{
 		return "$('" . $selector . "').highcharts('StockChart',\n" . $this->toJSON() . "\n);\n\n";

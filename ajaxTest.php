@@ -18,7 +18,7 @@
 
 
 
-      $.getJSON("ajaxChart.php?chart=traffic-hourly&account=ga:53193816", function( data )
+      $.getJSON("ajaxChart.php?chart=web-browsers&account=ga:53193816", function( data )
       {
       //  alert(data);
         $('#test').highcharts(

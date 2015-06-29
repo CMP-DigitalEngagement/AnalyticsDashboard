@@ -94,6 +94,23 @@ function hours()
 	return $res;
 }
 
+function toPercent($data, $precision  = 2)
+{
+  $percent = array();
+  $total = 0;
+  foreach ($data as $k => $d)
+  {
+     $total += $d;
+  }
+
+  foreach ($data as $k => $d)
+  {
+      $percent[$k] = round((float)$d * 100.0 / ((float)$total * 1.0),$precision);
+
+  }
+  return $percent;
+}
+
 function throwError($message, $function)
 {
   $return = array();
@@ -172,7 +189,7 @@ function getChart()
         case "web-traffic" : $chart = chartWebTraffic($set); break;
         case "mobile-os" : $chart = chartMobileOS($set); break;
         case "traffic-hourly" : $chart = chartTrafficHourly($set); break;
-
+        case "web-browsers" : $chart = chartWebBrowsers($set); break;
 
         //Not found
         default: $chart = null;  break;
@@ -237,7 +254,7 @@ function chartMobileOS($settings)
 
   $chart = new Highchart('bar');
   $chart->addCategories($data[0]);
-  $chart->addSeries($data[1],'Users', $colors[1]);
+  $chart->addSeries(toPercent($data[1]),'Users', $colors[1]);
 
   return $chart->toJson();
 }
@@ -258,6 +275,7 @@ function chartTrafficHourly($settings)
     return NULL;
   }
 
+  //Build chart
 
   $start = strtotime("12am");
   $int = strtotime("1 hour");
@@ -269,6 +287,30 @@ function chartTrafficHourly($settings)
   $chart->addSeries($data[2],'Sessions',$colors[2]);
   $chart->addSeries($data[3],'Users',$colors[1]);
   $chart->addCategories(hours(), 3);
+
+  return $chart->toJSON();
+}
+
+function chartWebBrowsers($settings)
+{
+  //Setup analytics
+  $analytics = getAnalytics();
+
+  //Get data
+  $colors = getColorScheme();
+  try
+  {
+      $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:users","ga:browser","-ga:users",'5','ga:deviceCategory==desktop')->getRows());
+  }
+  catch (Exception $e)
+  {
+    return NULL;
+  }
+
+  //Build chart
+  $chart = new Highchart('bar');
+  $chart->addCategories($data[0]);
+  $chart->addSeries(toPercent($data[1]),'% Users', $colors[0]);
 
   return $chart->toJSON();
 }
