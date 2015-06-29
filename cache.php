@@ -14,7 +14,7 @@ function loadFromCache($datasetName)
 		if(checkCache($datasetName))
 		{
 			$query = "SELECT data FROM datacache WHERE dataset = '$datasetName'";
-			if ($result = $sql->query($query)) 
+			if ($result = $sql->query($query))
 			{
 				$row = $result->fetch_assoc();
 				return $row['data'];
@@ -35,7 +35,7 @@ function storeInCache($datasetName, $data)
 			if($sql->query("UPDATE datacache SET data = '$data' WHERE dataset = '$datasetName'") == TRUE)
 			{
 				return true;
-			}	
+			}
 		}
 		else
 		{
@@ -53,24 +53,25 @@ function storeInCache($datasetName, $data)
 function checkCache($datasetName)
 {
 	global $cacheLimit;
+	cleanCache();
 	$sql = getSql();
 	if($sql != null)
 	{
 		$query = "SELECT updated FROM datacache WHERE dataset = '$datasetName'";
-		if ($result = $sql->query($query)) 
+		if ($result = $sql->query($query))
 		{
 			$row = $result->fetch_assoc();
-			if($row == NULL) return false; 
-			
+			if($row == NULL) return false;
+
 			$updated = strtotime($row['updated']);
 			$now = time();
-			
+
 			//Check for cache expiry
 			if(($now-$updated) > $cacheLimit) return false;
 			//valid!
 			return true;
 		}
-	
+
 	}
 	return false;
 }
@@ -82,12 +83,12 @@ function cacheExists($datasetName)
 	if($sql != null)
 	{
 		$query = "SELECT * FROM datacache WHERE dataset = '$datasetName'";
-		if ($result = $sql->query($query)) 
+		if ($result = $sql->query($query))
 		{
 			$row = $result->fetch_assoc();
-			if($row != NULL) return true; 
+			if($row != NULL) return true;
 		}
-	
+
 	}
 	return false;
 }
@@ -102,9 +103,29 @@ function dropCache()
 		{
 			return true;
 		}
-		
+
 	}
 	return false;
+
+}
+
+function cleanCache()
+{
+	global $cacheLimit;
+	$sql = getSql();
+	if($sql != null)
+	{
+		$date = date("Y-m-d H:i:s" ,time() - $cacheLimit);
+		$query = "delete from datacache where updated < '$date'";
+
+		if($sql->query($query))
+		{
+			return true;
+		}
+
+	}
+	return false;
+
 
 }
 
