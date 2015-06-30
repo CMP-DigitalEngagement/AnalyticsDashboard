@@ -74,13 +74,13 @@ function getChartList()
   }
   else
   {
-    $charts = json_decode(file_get_contents("charts.json"), true);
+    $charts = json_decode(file_get_contents("./app/charts.json"), true);
     return $charts;
   }
 
 }
 
-function setupChartHead($chartList, $from = null, $to = null);
+function setupChartHead($chartList, $from = null, $to = null)
 {
   $acct = getMuseum();
 
@@ -88,7 +88,7 @@ function setupChartHead($chartList, $from = null, $to = null);
   foreach($chartList as $c)
 	{
     $chart = $c["name"];
-		$jq = "$.getJSON('./app/ajaxChart.php?account=$acct&chart=$chart'";
+		$jq = "$.getJSON('./app/ajaxChart.php?account=$acct&chart=$chart";
     if(!empty($from))
     {
       $jq .= "&from=$from";
@@ -102,7 +102,7 @@ function setupChartHead($chartList, $from = null, $to = null);
     {
       $jq .= "'StockChart' ,";
     }
-    $jq .= "\ndata\n});\n});\n\n"
+    $jq .= "\ndata\n);\n});\n\n";
 
     print $jq;
 	}
@@ -135,6 +135,19 @@ function setupChart($cname, $ctitle)
 		</div>
 	</div>
 </div>
+
+<?php
+}
+
+function insertScripts()
+{
+?>
+<link href="plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="plugins/jquery/jquery-1.11.2.min.js"></script>
+<script src="plugins/bootstrap/js/bootstrap.min.js"></script>
+<script src="plugins/highstock/js/highstock.js"></script>
+<script src="plugins/highstock/js/modules/drilldown.js"></script>
 
 <?php
 }
