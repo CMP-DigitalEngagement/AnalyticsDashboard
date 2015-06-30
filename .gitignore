@@ -1,6 +1,6 @@
 /* State secrets */
-acctConfig.php
-sqlConfig.php
+app/acctConfig.php
+app/sqlConfig.php
 *.p12
 /* Plugins which I don't want to have managed */
 /plugins
