@@ -1,9 +1,16 @@
 <?php
 /*
-*   This file will generate the JSON required to display an analytical chart
-*
-*   The following charts can be used:
-*
+
+This file will generate the JSON required to display an analytical chart
+
+"web-traffic"
+"mobile-os"
+"traffic-hourly"
+"web-browsers"
+"most-viewed"
+"tos"
+"hist-views"
+
 */
 
 function showErrors()

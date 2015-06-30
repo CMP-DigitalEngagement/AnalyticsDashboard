@@ -11,48 +11,7 @@ showErrors();
 
 require_once 'dashboard.php';
 
-if(isset($_GET["c"]))
-{
-	
-	if($_GET["c"] == 1) {
-
-		dropCache();
-	}
-	
-	
-}
-
-
-
-$client = getClient();
-
-$token = Authenticate($client);
-
-$analytics = new Google_Service_Analytics($client);
-
-$charts = getCharts($analytics);
-
-
-
-function getActive()
-{
-	if(isset($_GET["m"]))
-	{
-		if($_GET["m"] == "Compare" || $_GET["m"] == "Combined")
-		{
-			print "\"#" . $_GET["m"] . "\"";
-		}
-		else
-		{
-			print "\"#" . $_GET["m"] . "tab\"";
-		}
-	}
-	else
-	{
-		print "\"#Combined\"";
-	}
-
-}
+$chartList = getChartList();
 ?>
 
 <!DOCTYPE html>
@@ -61,23 +20,23 @@ function getActive()
 	<?php insertScripts() ?>
 	<script>
 		$( document ).ready(function($) {
-			
-			
-			
-		
-			
-			
+
+
+
+
+
+
 			$('#main-nav').children().removeClass("active");
 			$(<?php getActive(); ?>).addClass("active");
 			console.log(<?php getActive(); ?>);
-			
-		
+
+
 			$('#main-nav').children().click(function()
 			{
 				//Active class change
 				$('#main-nav').children().removeClass("active");
 				$(this).addClass("active");
-				
+
 				//Get museum ID
 				var id = $(this).attr("id");
 				if(id == 'Compare' || id == 'Combined')
@@ -87,28 +46,23 @@ function getActive()
 					id = id.substring(0,id.length - 3);
 				}
 				console.log(id);
-				
+
 				//Submit a form so that php knows which museum to generate data for
 				$("#MuseumID").attr("value",id);
 				$("#MForm").submit();
-				
-				
+
+
 			});
-			
-				<?php
-			foreach($charts as $c)
-			{
-				print $c;
-			}
-			?>
-		
+
+			<?php setupChartHead($chartList); ?>
+
 		});
-		
-		
-		
-	
-	
-		
+
+
+
+
+
+
 	</script>
 	<style>
 	ul{
@@ -148,9 +102,9 @@ function getActive()
 <body>
 	<ul id='main-nav' class="nav nav-tabs">
 		<li id='Compare' role="presentation"><a href="#">Compare</a></li>
-		
+
 		<li id='Combined' role="presentation" class="active"><a href="#">Combined</a></li>
-	
+
 		<li id='CMPtab' role="presentation" ><a href="#">Central</a></li>
 
 		<li id='CMOAtab' role="presentation" ><a href="#">CMOA</a></li>
@@ -162,39 +116,19 @@ function getActive()
 		<li id='AWMtab' role="presentation"><a href="#">Warhol</a></li>
 
 	</ul>
-	
+
 		<form id='MForm' method='get'>
 			<input id='MuseumID' type='hidden' name='m'>
 		</form>
 
-	
-	
-	
+
+
+
 	<div id='Panel' class='main-panel container'>
-		
-		<?php 
-		if(getMuseum() == "Compare")
-		{	
 
-			setupCharts(
-			array("hist","duration","users"),
-			array("Historical Pageviews","Average Time on Site","New Users"));		
-		}
-		else if(getMuseum() == "Combined")
-		{
-			setupCharts(
-			array("views"),
-			array("Web Traffic (Pageviews)"));
-		}
-		else
-		{
-			setupCharts(
-			array("web-traffic","web-byhour","mobile-os","web-browser","most-viewed","hist-views","tos"),
-			array("Overall Web Traffic","Web Traffic by Hour","Mobile Operating Systems","Web Browsers","Most Viewed Pages","Historical Page Views","Time on Site"));
-
-		
-		}
-			?>
+		<?php
+			setupChartDisplay($chartList);
+		?>
 	</div>
-	
+
 </body>
