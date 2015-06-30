@@ -273,7 +273,7 @@ function chartMobileOS($settings)
 
   $chart = new Highchart('bar');
   $chart->addCategories($data[0]);
-  $chart->addSeries(toPercent($data[1]),'Users', $colors[1]);
+  $chart->addSeries(toPercent($data[1]),'% of Users', $colors[1]);
 
   return $chart->toJson();
 }
@@ -329,7 +329,7 @@ function chartWebBrowsers($settings)
   //Build chart
   $chart = new Highchart('bar');
   $chart->addCategories($data[0]);
-  $chart->addSeries(toPercent($data[1]),'% Users', $colors[0]);
+  $chart->addSeries(toPercent($data[1]),'% of Users', $colors[0]);
 
   return $chart->toJSON();
 }
