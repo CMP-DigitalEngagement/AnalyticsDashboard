@@ -1,0 +1,37 @@
+[
+  {
+    "title" : "Web Traffic",
+    "name"  : "web-traffic" ,
+    "stock" : false
+  },
+  {
+    "title" : "Traffic by Hour",
+    "name"  : "traffic-hourly",
+    "stock" : false
+  },
+  {
+    "title" : "Mobile Operating System",
+    "name"  : "mobile-os"  ,
+    "stock" : false
+  },
+  {
+    "title" : "Web Browsers",
+    "name"  : "web-browsers" ,
+    "stock" : false
+  },
+  {
+    "title" : "Most Viewed Pages",
+    "name"  : "most-viewed" ,
+    "stock" : false
+  },
+  {
+    "title" : "Time on Site",
+    "name"  : "tos",
+    "stock" : false
+  },
+  {
+    "title" : "Historical Page Views",
+    "name"  : "hist-views",
+    "stock" : true
+  }
+]
