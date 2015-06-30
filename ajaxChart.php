@@ -151,10 +151,19 @@ function getSettings()
   {
       $settings["From"] = GoogleDate(strtotime("-1 month -1 day"));
   }
+  else
+  {
+      $settings["From"] = GoogleDate(strtotime($settings["From"]));
+  }
   if(empty($settings["To"])) //To defaults to today
   {
       $settings["To"] = GoogleDate(strtotime("-1 day"));
   }
+  else
+  {
+      $settings["To"] = GoogleDate(strtotime($settings["To"]));
+  }
+
 
   return $settings;
 
@@ -186,10 +195,13 @@ function getChart()
 
       switch($set["Chart"])
       {
-        case "web-traffic" : $chart = chartWebTraffic($set); break;
-        case "mobile-os" : $chart = chartMobileOS($set); break;
-        case "traffic-hourly" : $chart = chartTrafficHourly($set); break;
-        case "web-browsers" : $chart = chartWebBrowsers($set); break;
+        case "web-traffic"      : $chart = chartWebTraffic($set); break;
+        case "mobile-os"        : $chart = chartMobileOS($set); break;
+        case "traffic-hourly"   : $chart = chartTrafficHourly($set); break;
+        case "web-browsers"     : $chart = chartWebBrowsers($set); break;
+        case "most-viewed"      : $chart = chartMostViewed($set); break;
+        case "tos"              : $chart = chartTOS($set); break;
+        case "hist-views"       : $chart = chartHistViews($set); break;
 
         //Not found
         default: $chart = null;  break;
@@ -314,6 +326,97 @@ function chartWebBrowsers($settings)
 
   return $chart->toJSON();
 }
+
+function chartMostViewed($settings)
+{
+  //Setup analytics
+  $analytics = getAnalytics();
+
+  //Get data
+  $colors = getColorScheme();
+  try
+  {
+      $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:pageviews","ga:pagePath","-ga:pageviews",'15')->getRows());
+  }
+  catch (Exception $e)
+  {
+    error_log("Error: $e");
+    return NULL;
+  }
+
+  //Build chart
+
+  $chart = new Highchart('bar');
+  $chart->addCategories($data[0]);
+  $chart->addSeries($data[1],'Views', $colors[2]);
+
+  return $chart->toJSON();
+
+}
+
+function chartTOS($settings)
+{
+  //Setup analytics
+  $analytics = getAnalytics();
+
+  //Get data
+  $colors = getColorScheme();
+  try
+  {
+      $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:avgTimeOnPage,ga:avgSessionDuration","ga:date","",'10000')->getRows());
+  }
+  catch (Exception $e)
+  {
+    error_log("Error: $e");
+    return NULL;
+  }
+
+  //Build chart
+
+  $chart = new Highchart('areaspline');
+
+  $start = strtotime(($data[0][0])) * 1000;
+  $int = (strtotime(($data[0][1])) - strtotime(($data[0][0]))) * 1000;
+  $chart->addTimestamps($start, $int);
+  $chart->addLegend();
+  $chart->addPlotOption('fillOpacity',0.2);
+  $chart->addSeries($data[2],"Avg. Time on Site (s)", $colors[1]);
+  $chart->addSeries($data[1],"Avg. Time on Page (s)", $colors[0]);
+
+  return $chart->toJson();
+}
+
+function chartHistViews($settings)
+{
+  //Setup analytics
+  $analytics = getAnalytics();
+
+  //Check from date
+  if(!tryGet("from")) //If default
+  {
+    $settings["From"] = GoogleDate(strtotime("-3 year -1 day"));
+  }
+
+  //Get data
+  $colors = getColorScheme();
+  try
+  {
+      $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:pageviews","ga:date","",'10000')->getRows());
+  }
+  catch (Exception $e)
+  {
+    error_log("Error: $e");
+    return NULL;
+  }
+
+  //Build chart
+  $chart = new Highstock();
+  $chart->addSeries($data[0], $data[1],'Views', $colors[3]);
+
+  return $chart->toJSON();
+}
+
+
 
 
 

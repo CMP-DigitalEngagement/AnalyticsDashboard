@@ -43,7 +43,7 @@ class Highchart
 		$newdata = array();
 		foreach($data as $d)
 		{
-			array_push($newdata, floatval($d));
+			array_push($newdata, round(floatval($d),2));
 		}
 
 		return $newdata;

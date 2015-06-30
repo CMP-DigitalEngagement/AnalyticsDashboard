@@ -18,10 +18,10 @@
 
 
 
-      $.getJSON("ajaxChart.php?chart=web-browsers&account=ga:53193816", function( data )
+      $.getJSON("ajaxChart.php?chart=hist-views&account=ga:12575410", function( data )
       {
       //  alert(data);
-        $('#test').highcharts(
+        $('#test').highcharts("StockChart",
            data
           );
       }).done(function(data) {
