@@ -101,7 +101,7 @@ function hours()
 	return $res;
 }
 
-function toPercent($data, $precision  = 2)
+function toPercent($data, $top = 5, $precision  = 2)
 {
   $percent = array();
   $total = 0;
@@ -109,6 +109,8 @@ function toPercent($data, $precision  = 2)
   {
      $total += $d;
   }
+
+	array_splice($data, $top);
 
   foreach ($data as $k => $d)
   {
@@ -242,7 +244,7 @@ function chartWebTraffic($settings)
   }
 
   //Form chart
-  $start = strtotime(strtotime($data[0][0]));
+  $start = strtotime($data[0][0]);
   $int = strtotime($data[0][1]) - strtotime($data[0][0]);
   $chart = new Highchart('areaspline');
   $chart->addLegend();
@@ -264,7 +266,7 @@ function chartMobileOS($settings)
   $colors = getColorScheme();
   try
   {
-    $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:users","ga:operatingSystem","-ga:users",'5','','gaid::-11')->getRows());
+    $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:users","ga:operatingSystem","-ga:users",'15','','gaid::-11')->getRows());
   }
   catch (Exception $e)
   {
@@ -319,7 +321,7 @@ function chartWebBrowsers($settings)
   $colors = getColorScheme();
   try
   {
-      $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:users","ga:browser","-ga:users",'5','ga:deviceCategory==desktop')->getRows());
+      $data = invertData(runQuery($analytics, $settings["Account"], $settings["From"], $settings["To"],"ga:users","ga:browser","-ga:users",'15','ga:deviceCategory==desktop')->getRows());
   }
   catch (Exception $e)
   {
