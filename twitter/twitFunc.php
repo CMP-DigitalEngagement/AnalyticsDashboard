@@ -25,7 +25,7 @@ function getToken()
 	curl_setopt($curl,	CURLOPT_HTTPHEADER		, $headers);
 	curl_setopt($curl,	CURLOPT_RETURNTRANSFER	, true);
 	curl_setopt($curl,	CURLOPT_ENCODING 		, "gzip");
-	curl_setopt($curl,	CURLOPT_SSL_VERIFYPEER	, false);
+	curl_setopt($curl,	CURLOPT_SSL_VERIFYPEER	, false); //Because twitter's API SSL is broken
 
 
 	if( ! $result = curl_exec($curl))
