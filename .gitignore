@@ -1,8 +1,9 @@
 /* State secrets */
 app/acctConfig.php
 app/sqlConfig.php
-instagram/igConfig.php
-twitter/twitConfig.php
+api/instagram/igConfig.php
+api/twitter/twitConfig.php
+api/facebook/fbConfig.php
 *.p12
 /* Plugins which I don't want to have managed */
 plugins/
